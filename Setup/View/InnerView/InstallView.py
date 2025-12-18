@@ -2,7 +2,7 @@ from Setup.View.InnerView.AbstractInnerView import *
 import zipfile
 import os
 from win32com.client import Dispatch
-from Utility.Info.DefaultFilePath import *
+from Utility.File.BasicFileTable import *
 
 
 class InstallView(AbstractInnerView):
@@ -15,7 +15,7 @@ class InstallView(AbstractInnerView):
 
     def install(self):
         install_path = self.beforeView().beforeView().installPath()
-        data_path = DefaultFilePath.DATA
+        data_path = BasicFileTable.DATA
         content_text = ''
         try:
             exe_zip_ref = zipfile.ZipFile('ArisuRecord.zip', 'r')
@@ -49,7 +49,9 @@ class InstallView(AbstractInnerView):
         shortcut_exe.save()
 
         record_folder_path = os.path.join(desktop_path, "기록부.lnk")
-        record_folder_target = DefaultFilePath.Record
+        record_folder_target = BasicFileTable.Record
+        # record_folder_wDir = BasicFileTable.Record
+        # record_folder_icon = BasicFileTable.Record
 
         shortcut_record_folder = shell.CreateShortCut(record_folder_path)
         shortcut_record_folder.TargetPath = record_folder_target

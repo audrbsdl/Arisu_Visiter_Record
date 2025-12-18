@@ -1,145 +1,144 @@
-from Utility.MyPyqt.MyDefaultWidgets import *
-
-"""
-TakeoverView
-"""
+from Utility.UI.BaseUI import *
 
 
 class TakeoverViewSignal(QObject):
-    TakeoverButtonClicked = pyqtSignal()
-    DeliveryButtonClicked = pyqtSignal()
+    TakeoverBtnClicked = pyqtSignal(str, str, str)
+    DeliveryBtnClicked = pyqtSignal()
 
     def __init__(self, parent = None):
         super().__init__(parent)
 
 
-class TakeoverView(QGroupBox):
+class TakeoverView(QWidget):
     DefaultWorker = '근무자'
     DefaultTime = '08:00'
 
-    def __init__(self, parent: QWidget = None):
-        super().__init__(parent)
+    def __init__(self):
+        super().__init__()
 
         # 시그널 정의
-        self.__signal_set = TakeoverViewSignal(self)
+        self.__signal_set = TakeoverViewSignal()
 
-        # 전체 위젯 스타일링
+        # 전체 그룹 박스
+        self.group = QGroupBox('인수인계')
+
+        # 전체 그룹 박스 스타일링
         # 타이틀만 굵고 크게, 내용물은 기본 크기 유지
-        self.setTitle('인수인계')
-        self.setFont(MyDefaultWidgets.basicQFont(bold=True, point_size=MyDefaultWidgets.basicPointSize() + 2))
+        self.group.setFont(BaseUI.basicQFont(bold=True, point_size=BaseUI.defaultPointSize() + 2))
+        #self.group_content.setFont(BaseUI.basicQFont())
+
 
         # 소속 조
-        team_group = QGroupBox()
-        team_lbl = MyDefaultWidgets.basicQLabel(font=MyDefaultWidgets.basicQFont(bold=True), text='소속 조')
-        self.__team_cb = QComboBox()
-        self.__team_cb.addItems(['A조', 'B조', 'C조', 'D조'])
+        self.team_group = QGroupBox()
+        self.team_lbl = BaseUI.basicQLabel(font=BaseUI.basicQFont(bold=True), text='소속 조')
+        self.team_cb = QComboBox()
+        self.team_cb.addItems(['A조', 'B조', 'C조', 'D조'])
 
         # 소속 조 스타일링
         #   line
-        self.__team_cb.setFont(MyDefaultWidgets.basicQFont())
-        self.__team_cb.setEditable(True)
-        self.__team_cb.lineEdit().setAlignment(Qt.AlignCenter)
-        for i in range(self.__team_cb.count()):
-            self.__team_cb.setItemData(i, Qt.AlignCenter, Qt.TextAlignmentRole)
+        self.team_cb.setFont(BaseUI.basicQFont())
+        self.team_cb.setEditable(True)
+        #self.team_cb.lineEdit().setReadOnly(True)  # todo: 임시로
+        self.team_cb.lineEdit().setAlignment(Qt.AlignCenter)
+        for i in range(self.team_cb.count()):
+            self.team_cb.setItemData(i, Qt.AlignCenter, Qt.TextAlignmentRole)
 
         # 소속 조 레이아웃
-        team_vbox = QVBoxLayout()
-        team_vbox.addStretch(1)
-        team_vbox.addWidget(team_lbl)
-        team_vbox.addStretch(1)
-        team_vbox.addWidget(self.__team_cb)
-        team_vbox.addStretch(1)
-        team_group.setLayout(team_vbox)
+        self.team_vbox = QVBoxLayout()
+        self.team_vbox.addStretch(1)
+        self.team_vbox.addWidget(self.team_lbl)
+        self.team_vbox.addStretch(1)
+        self.team_vbox.addWidget(self.team_cb)
+        self.team_vbox.addStretch(1)
+        self.team_group.setLayout(self.team_vbox)
 
         # 교대자 이름
-        worker_group = QGroupBox()
-        worker_lbl = MyDefaultWidgets.basicQLabel(font=MyDefaultWidgets.basicQFont(bold=True), text='교대자')
-        self.__worker_le = MyDefaultWidgets.basicQLineEdit(text=TakeoverView.DefaultWorker)
-        self.__worker_le.installFilterFunctions(ConfigModule.FieldFilter.filterFunctionList(TableFieldOption.Necessary.NAME))
+        self.worker_group = QGroupBox()
+        # self.worker_lbl = QLabel('교대자')
+        self.worker_lbl = BaseUI.basicQLabel(font=BaseUI.basicQFont(bold=True), text='교대자')
+        self.worker_line = BaseUI.basicQLineEdit(text=TakeoverView.DefaultWorker)
+        self.worker_line.installFilterFunctions(Config.FilterOption.activeFunctionList('성명'))
+        #self.worker_line.setFixedWidth(100)
 
         # 교대자 이름 레이아웃
-        worker_vbox = QVBoxLayout()
-        worker_vbox.addStretch(1)
-        worker_vbox.addWidget(worker_lbl)
-        worker_vbox.addStretch(1)
-        worker_vbox.addWidget(self.__worker_le)
-        worker_vbox.addStretch(1)
-        worker_group.setLayout(worker_vbox)
+        self.worker_vbox = QVBoxLayout()
+        self.worker_vbox.addStretch(1)
+        self.worker_vbox.addWidget(self.worker_lbl)
+        self.worker_vbox.addStretch(1)
+        self.worker_vbox.addWidget(self.worker_line)
+        self.worker_vbox.addStretch(1)
+        self.worker_group.setLayout(self.worker_vbox)
 
         # 교대 시각
-        time_group = QGroupBox()
-        time_lbl = MyDefaultWidgets.basicQLabel(font=MyDefaultWidgets.basicQFont(bold=True), text='교대시각')
-        self.__time_le = MyDefaultWidgets.basicQLineEdit(text=TakeoverView.DefaultTime)
-        self.__time_le.setTimeMask()
-        # self.__time_le.editingFinished.connect(lambda: self.time_line.setText(ConfigModule.FilterOption.FilterFunction.time(self.time_line.text())))
+        self.time_group = QGroupBox()
+        self.time_lbl = BaseUI.basicQLabel(font=BaseUI.basicQFont(bold=True), text='교대시각')
+        self.time_line = BaseUI.basicQLineEdit(text=TakeoverView.DefaultTime)
+        self.time_line.setTimeMask()
+        #self.time_line.editingFinished.connect(lambda: self.time_line.setText(Config.FilterOption.FilterFunction.time(self.time_line.text())))
+        #self.time_line.setFixedWidth(100)
 
         # 교대 시각 레이아웃
-        time_vbox = QVBoxLayout()
-        time_vbox.addStretch(1)
-        time_vbox.addWidget(time_lbl)
-        time_vbox.addStretch(1)
-        time_vbox.addWidget(self.__time_le)
-        time_vbox.addStretch(1)
-        time_group.setLayout(time_vbox)
+        self.time_vbox = QVBoxLayout()
+        self.time_vbox.addStretch(1)
+        self.time_vbox.addWidget(self.time_lbl)
+        self.time_vbox.addStretch(1)
+        self.time_vbox.addWidget(self.time_line)
+        self.time_vbox.addStretch(1)
+        self.time_group.setLayout(self.time_vbox)
 
         # 인수인계 버튼
-        take_over_btn = MyDefaultWidgets.basicQPushButton(text='인수인계')
-        take_over_btn.clicked.connect(lambda: self.signalSet().TakeoverButtonClicked.emit())
-        take_over_btn.setMinimumHeight(int(take_over_btn.sizeHint().height() * 1.5))
+        self.take_over_btn = BaseUI.basicQPushButton(text='인수인계')
+        self.take_over_btn.clicked.connect(self.takeoverBtnClicked)
+        self.take_over_btn.setMinimumHeight(int(self.take_over_btn.sizeHint().height() * 1.5))
 
         # 전달사항 버튼
-        delivery_btn = MyDefaultWidgets.basicQPushButton(text='전달사항')  # ☎📢
-        delivery_btn.clicked.connect(lambda: self.signalSet().DeliveryButtonClicked.emit())
+        self.delivery_btn = BaseUI.basicQPushButton(text='전달사항')  # ☎📢
+        self.delivery_btn.clicked.connect(self.deliveryBtnClicked)
 
         # 버튼 레이아웃
         vbox_rightbottom = QVBoxLayout()
-        vbox_rightbottom.addWidget(delivery_btn)
-        vbox_rightbottom.addWidget(take_over_btn)
+        vbox_rightbottom.addWidget(self.delivery_btn)
+        vbox_rightbottom.addWidget(self.take_over_btn)
 
         # 전체 레이아웃
-        QWidget.setTabOrder(team_group, worker_group)
-        QWidget.setTabOrder(worker_group, time_group)
-        QWidget.setTabOrder(time_group, take_over_btn)
+        QWidget.setTabOrder(self.team_group, self.worker_group)
+        QWidget.setTabOrder(self.worker_group, self.time_group)
+        QWidget.setTabOrder(self.time_group, self.take_over_btn)
 
-        g_layout = QGridLayout()
-        g_layout.addWidget(team_group, 0, 0)
-        g_layout.addWidget(worker_group, 0, 1)
-        g_layout.addWidget(time_group, 1, 0)
-        g_layout.addLayout(vbox_rightbottom, 1, 1)
+        self.g_layout = QGridLayout()
+        self.g_layout.addWidget(self.team_group, 0, 0)
+        self.g_layout.addWidget(self.worker_group, 0, 1)
+        self.g_layout.addWidget(self.time_group, 1, 0)
+        self.g_layout.addLayout(vbox_rightbottom, 1, 1)
 
-        self.setLayout(g_layout)
+        self.group.setLayout(self.g_layout)
 
-    """
-    property
-    * signalSet
-    * teamText, timeText, workerText
-    """
-    def signalSet(self) -> TakeoverViewSignal:
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.group)
+        self.setLayout(vbox)
+
+    def __str__(self):
+        return 'TakeoverView'
+
+    def getSignalSet(self) -> TakeoverViewSignal:
         return self.__signal_set
 
-    def teamText(self) -> str:
-        return self.__team_cb.currentText()
+    def setLineEditsDefault(self):
+        # self.time_line.setText(TakeoverView.DefaultTime)
+        self.worker_line.setText(TakeoverView.DefaultWorker)
 
-    def setTeamText(self, text: str) -> None:
-        self.__team_cb.setCurrentText(text)  # todo 콤보박스에서 이게 되나?
+    def setCurrentVisitorNumber(self, visitor_num: int) -> None:
+        self.remain_number = visitor_num
+        self.remain_lbl.setText(f'잔여인원: {self.remain_number}명')
 
-    def timeText(self) -> str:
-        return self.__time_le.text()
+    @MyPyqtSlot()
+    def takeoverBtnClicked(self):
+        take_over_team = self.team_cb.currentText()
+        take_over_time = self.time_line.text()
+        take_over_worker = self.worker_line.text()
 
-    def setTimeText(self, text: str) -> None:
-        self.__time_le.setText(text)
+        self.getSignalSet().TakeoverBtnClicked.emit(take_over_time, take_over_team, take_over_worker)
 
-    def workerText(self) -> str:
-        return self.__worker_le.text()
-
-    def setWorkerText(self, text: str) -> None:
-        self.__worker_le.setText(text)
-
-    """
-    method
-    * setDefault
-    """
-    def setDefault(self):
-        self.setWorkerText(TakeoverView.DefaultWorker)
-
-
+    @MyPyqtSlot()
+    def deliveryBtnClicked(self):
+        self.getSignalSet().DeliveryBtnClicked.emit()

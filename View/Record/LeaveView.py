@@ -1,122 +1,103 @@
-from Utility.MyPyqt.MyDefaultWidgets import *
-
-"""
-LeaveView
-"""
+from Utility.UI.BaseUI import *
 
 
 class LeaveViewSignal(QObject):
-    LeaveButtonClicked = pyqtSignal()
+    LeaveBtnClicked = pyqtSignal(str, str)
 
     def __init__(self, parent = None):
         super().__init__(parent)
 
 
-class LeaveView(QGroupBox):
+class LeaveView(QWidget):
     DefaultIDNumBlank = ''
     DefaultNameAll = '모두'
 
-    def __init__(self, parent: QWidget = None):
-        super().__init__(parent)
+    def __init__(self):
+        super().__init__()
 
         # 시그널 정의
         self.__signal_set = LeaveViewSignal(self)
 
         # 전체 그룹 박스
-        self.setTitle('나가다')
+        self.group = QGroupBox('나가다')
         temp_vbox = QVBoxLayout()
-        group_content = QWidget()
-        temp_vbox.addWidget(group_content)
-        self.setLayout(temp_vbox)
+        self.group_content = QWidget()
+        temp_vbox.addWidget(self.group_content)
+        self.group.setLayout(temp_vbox)
 
         # 전체 그룹 박스 스타일링
-        self.setFont(MyDefaultWidgets.basicQFont(bold=True, point_size=MyDefaultWidgets.basicPointSize() + 2))
+        self.group.setFont(BaseUI.basicQFont(bold=True, point_size=BaseUI.defaultPointSize() + 2))
 
         # 출입증 번호 그룹박스
-        idnum_group = QGroupBox()
-        idnum_lbl = MyDefaultWidgets.basicQLabel(font=MyDefaultWidgets.basicQFont(bold=True), text='출입증 번호')
-        self.__idnum_le = MyDefaultWidgets.basicQLineEdit(text=LeaveView.DefaultIDNumBlank)
-        self.__idnum_le.installFilterFunctions(ConfigModule.FieldFilter.filterFunctionList(TableFieldOption.Necessary.RECORD_ID))
+        self.idnum_group = QGroupBox()
+        self.idnum_lbl = BaseUI.basicQLabel(font=BaseUI.basicQFont(bold=True), text='출입증 번호')
+        self.idnum_line = BaseUI.basicQLineEdit(text=LeaveView.DefaultIDNumBlank)
+        self.idnum_line.installFilterFunctions(Config.FilterOption.activeFunctionList('출입증번호'))
 
         # 출입증 번호 스타일링
         #   line
         #self.idnum_line.setFixedWidth(100)
 
         # 출입증 번호 레이아웃
-        idnum_hbox = QVBoxLayout()
-        idnum_hbox.addWidget(idnum_lbl)
-        idnum_hbox.addWidget(self.__idnum_le)
-        idnum_group.setLayout(idnum_hbox)
+        self.idnum_hbox = QVBoxLayout()
+        self.idnum_hbox.addWidget(self.idnum_lbl)
+        self.idnum_hbox.addWidget(self.idnum_line)
+        self.idnum_group.setLayout(self.idnum_hbox)
 
         # 성명 그룹박스
-        name_group = QGroupBox()
-        name_lbl = MyDefaultWidgets.basicQLabel(font=MyDefaultWidgets.basicQFont(bold=True), text='성명')
+        self.name_group = QGroupBox()
+        self.name_lbl = BaseUI.basicQLabel(font=BaseUI.basicQFont(bold=True), text='성명')
 
-        self.__name_le = MyDefaultWidgets.basicQLineEdit(text=LeaveView.DefaultNameAll)
-        self.__name_le.installFilterFunctions(ConfigModule.FieldFilter.filterFunctionList(TableFieldOption.Necessary.NAME))
+        self.name_line = BaseUI.basicQLineEdit(text=LeaveView.DefaultNameAll)
+        self.name_line.installFilterFunctions(Config.FilterOption.activeFunctionList('성명'))
 
         # 성명 스타일링
         #   line
         #self.name_line.setFixedWidth(100)
 
         # 성명 레이아웃
-        name_hbox = QVBoxLayout()
-        name_hbox.addWidget(name_lbl)
-        name_hbox.addWidget(self.__name_le)
-        name_group.setLayout(name_hbox)
+        self.name_hbox = QVBoxLayout()
+        self.name_hbox.addWidget(self.name_lbl)
+        self.name_hbox.addWidget(self.name_line)
+        self.name_group.setLayout(self.name_hbox)
 
         # 나가다 버튼 위젯
-        leave_txt = '나가다 (Ctrl + D)' if ConfigModule.Application.enableShortCut() else '나가다'
-        leave_btn = MyDefaultWidgets.basicQPushButton(text=leave_txt)
-        leave_btn.clicked.connect(self.leaveButtonClicked)
-        leave_btn.setMinimumHeight(int(leave_btn.sizeHint().height() * 1.5))
+        self.leave_short_cut_text = 'Ctrl + D'
+        self.leave_btn = BaseUI.basicQPushButton(text='나가다 (' + self.leave_short_cut_text + ')')
+        self.leave_btn.clicked.connect(self.leaveBtnClicked)
+        self.leave_btn.setMinimumHeight(int(self.leave_btn.sizeHint().height() * 1.5))
 
         # 전체 레이아웃
-        QWidget.setTabOrder(idnum_group, name_group)
-        QWidget.setTabOrder(name_group, leave_btn)
+        QWidget.setTabOrder(self.idnum_group, self.name_group)
+        QWidget.setTabOrder(self.name_group, self.leave_btn)
 
-        g_layout = QGridLayout()
-        g_layout.addWidget(idnum_group, 0, 0)
-        g_layout.addWidget(name_group, 0, 1)
-        g_layout.addWidget(leave_btn, 1, 0, 1, 2)
-        group_content.setLayout(g_layout)
+        self.g_layout = QGridLayout()
+        self.g_layout.addWidget(self.idnum_group, 0, 0)
+        self.g_layout.addWidget(self.name_group, 0, 1)
+        self.g_layout.addWidget(self.leave_btn, 1, 0, 1, 2)
+        self.group_content.setLayout(self.g_layout)
 
-    """
-    property
-    * signalSet
-    * recordIdText, nameText
-    """
-    def signalSet(self) -> LeaveViewSignal:
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.group)
+        self.setLayout(vbox)
+
+    def __str__(self):
+        return 'LeaveView'
+
+    def getSignalSet(self) -> LeaveViewSignal:
         return self.__signal_set
 
-    def recordIdText(self) -> str:
-        return self.__idnum_le.text()
+    def setLineEditsDefault(self):
+        self.idnum_line.setText(LeaveView.DefaultIDNumBlank)
+        self.name_line.setText(LeaveView.DefaultNameAll)
 
-    def nameText(self) -> str:
-        return self.__name_le.text()
-
-    def setRecordIdText(self, text: str) -> None:
-        self.__idnum_le.setText(text)
-
-    def setNameText(self, text: str) -> None:
-        self.__name_le.setText(text)
-
-    """
-    method
-    * setDefault
-    """
-    def setDefault(self) -> None:
-        self.setRecordIdText(LeaveView.DefaultIDNumBlank)
-        self.setNameText(LeaveView.DefaultNameAll)
-
-    """
-    slot
-    * leaveButtonClicked
-    """
     @MyPyqtSlot()
-    def leaveButtonClicked(self) -> None:  # todo 시간없어서 그냥 public으로 하고 ShortCutManager에 등록함
-        if self.recordIdText() == LeaveView.DefaultIDNumBlank:
-            self.__idnum_le.setFocus()
+    def leaveBtnClicked(self):
+        visitor_num = self.idnum_line.text()
+        visitor_name = self.name_line.text()
+
+        if visitor_num == LeaveView.DefaultIDNumBlank:
+            self.idnum_line.setFocus()
         else:
-            self.signalSet().LeaveButtonClicked.emit()
+            self.getSignalSet().LeaveBtnClicked.emit(visitor_num, visitor_name)
 
