@@ -9,3 +9,12 @@
 	사용 언어: Python - Pyqt5
 
 > 프로그램 버전별 변경 내역은 [CHANGELOG.md 파일](./CHANGELOG.md)을 참고해 주세요.
+
+<br>
+
+## 개발환경 세팅
+
+1. python 설치
+2. poetry 설치 - https://python-poetry.org/docs
+3. `poetry install`
+4. `poetry run python ArisuRecord.py`
